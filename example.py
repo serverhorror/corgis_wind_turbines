@@ -1,3 +1,11 @@
+#%%
+def my_print(msg="Hello, interactive window!"):
+    print(msg)
+
+
+#%%
+my_print()
+
 # %%
 import enum
 import time
@@ -14,34 +22,41 @@ from plotly.colors import cyclical, sequential
 
 #%%
 @lru_cache(15)
-def read_my_data():
+def read_my_data(head=True):
     print("Reading tons of data", end="")
-    for i in range(10):
-        print(".", end="")
-        time.sleep(1)
-    print("done!")
+    if head == False:
+        for i in range(10):
+            print(".", end="")
+            time.sleep(1)
+        print("done!")
     df = pd.read_csv("wind_turbines.csv", header=0)
+    if head:
+        return df.head()
     return df
 
 
 #%%
-read_my_data().head()
+read_my_data()
+#%%
+read_my_data(False)
 
 
 #%%
-SC = "Site.County"
+head = read_my_data(False).head()
+
+#%%
+SC = "Site.State"
 TC = "Turbine.Capacity"
-head = read_my_data().head()
 #%%
 head
 
 #%%
-head[SC]  ## access by row
+head[SC]  ## access by column
 #%%
 head.loc[1]  # get the first row
 
 #%%
-df2 = read_my_data()[[SC, TC]].groupby([SC]).mean()
+df2 = read_my_data(False)[[SC, TC]].groupby([SC]).mean()
 #%%
 df3 = pd.concat(
     [
@@ -50,6 +65,7 @@ df3 = pd.concat(
     ]
 ).sort_values(
     by=TC,
+    ascending=False,
 )
 # %%
 
@@ -73,8 +89,8 @@ def get_plot(plot_type: PlotType, df: pd.DataFrame) -> Any:
             y=TC,
             # nbins=7,
             opacity=0.8,
-            # log_y=True,  # represent bars with log scale
-            # color_discrete_sequence=[cyclical.Twilight],  # color of histogram bars
+            log_y=True,  # represent bars with log scale
+            # color_discrete_sequence=[cyclical.IceFire],  # color of histogram bars
             color=TC,
             # histfunc="avg",
         )
@@ -83,12 +99,9 @@ def get_plot(plot_type: PlotType, df: pd.DataFrame) -> Any:
 
 
 #%%
-df = read_my_data()
-
+get_plot(PlotType.PLOTLY, df2.sort_values(by=TC)).show()
 #%%
-get_plot(PlotType.MATPLOTLIB, df).show()
-#%%
-get_plot(PlotType.PLOTLY, df).show()
+get_plot(PlotType.MATPLOTLIB, df2.sort_values(by=TC)).show()
 
 #%%
 
